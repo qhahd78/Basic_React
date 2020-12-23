@@ -7,7 +7,20 @@ class TOC extends Component{
       var i = 0;
       while(i < data.length){
         lists.push(
-          <li key={data[i].id}><a href={"/content/"+data[i].id}>{data[i].title}</a></li>
+          <li key={data[i].id}>
+            <a
+              href={"/content/"+data[i].id}
+              data-id={data[i].id}
+              onClick={function(e){
+                //a 태그
+                // e.target.dataset.id
+                // debugger;
+                e.preventDefault();
+                //App.js 의 함수 실행
+                this.props.onChangePage(e.target.dataset.id);
+              }.bind(this)}
+            >{data[i].title}</a>
+          </li>
         );
         i = i + 1;
       }
