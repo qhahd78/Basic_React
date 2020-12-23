@@ -1,5 +1,6 @@
 //커밋이 되나 ?
 //커밋이 되는지 안 되는지 ..
+//이제는 커밋이 되겠죠?
 
 import React, { Component } from 'react';
 import './App.css';
