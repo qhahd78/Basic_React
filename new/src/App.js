@@ -8,6 +8,7 @@ import './App.css';
 import TOC from './components/TOC';
 import Content from './components/Content';
 import Subject from './components/Subject';
+import Control from './components/Control';
 // Component 가 로드 될 때 css 도 함께 로드 . 
 // App 이라고 하는 COmponent 의 디자인을 App 에 함께 넣는다. 
 
@@ -108,6 +109,12 @@ class App extends Component {
           }.bind(this)}
           data={this.state.contents}
         ></TOC>
+        <Control onChangeMode={function(_mode){
+          this.setState({
+          //fuction 에서 가져온 모드로 변경 
+            mode:_mode
+          })
+        }.bind(this)}></Control>
         <Content title={_title} desc={_desc}></Content>
       </div>
     );
