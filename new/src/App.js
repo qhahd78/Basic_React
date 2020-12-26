@@ -6,9 +6,10 @@ import React, { Component } from 'react';
 import './App.css';
 //TOC 가져오기. 아래에 클래스 정의 안 해도 작동 됨. 
 import TOC from './components/TOC';
-import Content from './components/Content';
+import ReadContent from './components/ReadContent';
 import Subject from './components/Subject';
 import Control from './components/Control';
+import CreateContent from './components/CreateContent';
 // Component 가 로드 될 때 css 도 함께 로드 . 
 // App 이라고 하는 COmponent 의 디자인을 App 에 함께 넣는다. 
 
@@ -28,8 +29,10 @@ class App extends Component {
 //constructor 에서는 편하게 state 값들을 바꾸어도 된다. 
   constructor(props){
     super(props);
+    //마지막 객체의 id 값과 같아야 한다. 
+    this.max_content_id = 3;
     this.state = {
-      mode:'read',
+      mode:'create',
       //기본으로 2번이 선택. 
       selected_content_id:2,
       subject:{title:'WEB', sub: 'World Wide Web!'},
@@ -45,11 +48,12 @@ class App extends Component {
 //props나 state 값이 바뀌면, 해당되는 render 함수가 호출된다.
 //=props와 state 값이 바뀌면, 화면이 다시 그려진다.  
   render () {
-    var _title, _desc = null;
+    var _title, _desc, _article = null;
     //welcome 일 경우 아래 코드 실행. welcome 이므로 아래 코드가 실행된다. 
     if(this.state.mode === 'welcome'){
       _title = this.state.welcome.title;
       _desc = this.state.welcome.desc;
+      _article = <ReadContent title={_title} desc={_desc}></ReadContent>
     } else if(this.state.mode === 'read'){
       //read 일 경우 아래 코드 실행. 
       var i = 0;
@@ -63,6 +67,25 @@ class App extends Component {
         }
         i = i + 1;
       }
+      _article= <ReadContent title={_title} desc={_desc}></ReadContent>
+    } else if(this.state.mode === 'create'){
+      //title 과 desc 값을 CreateContent 에서 가져온다 .
+      _article = <CreateContent onSubmit={function(_title, _desc){
+        //max content 하나 더해주기
+        this.max_content_id = this.max_content_id+1;
+        //새로운 컨텐츠 state 에 setState 사용해서 추가해주기 
+        // this.state.contents.push{
+        //   {id:this.max_content_id, title:_title, desc:_desc}
+        // };
+        //concat: 원본 데이터를 수정하지 않고, 새로운 데이터를 state에 추가. 
+        var _contents = this.state.contents.concat(
+          {id:this.max_content_id, title:_title, desc:_desc}
+        )
+        this.setState({
+          contents:this.state.contents
+        });
+      
+      }.bind(this)}></CreateContent>
     }
     return (
       <div className="App">
@@ -115,7 +138,7 @@ class App extends Component {
             mode:_mode
           })
         }.bind(this)}></Control>
-        <Content title={_title} desc={_desc}></Content>
+        {_article}
       </div>
     );
   }
