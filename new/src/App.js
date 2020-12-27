@@ -10,6 +10,7 @@ import ReadContent from './components/ReadContent';
 import Subject from './components/Subject';
 import Control from './components/Control';
 import CreateContent from './components/CreateContent';
+import UpdateContent from './components/UpdateContent';
 // Component 가 로드 될 때 css 도 함께 로드 . 
 // App 이라고 하는 COmponent 의 디자인을 App 에 함께 넣는다. 
 
@@ -32,7 +33,7 @@ class App extends Component {
     //마지막 객체의 id 값과 같아야 한다. 
     this.max_content_id = 3;
     this.state = {
-      mode:'create',
+      mode:'welcome',
       //기본으로 2번이 선택. 
       selected_content_id:2,
       subject:{title:'WEB', sub: 'World Wide Web!'},
@@ -47,7 +48,19 @@ class App extends Component {
   }
 //props나 state 값이 바뀌면, 해당되는 render 함수가 호출된다.
 //=props와 state 값이 바뀌면, 화면이 다시 그려진다.  
-  render () {
+getReadContent(){
+  var i = 0;
+      while(i < this.state.contents.length){
+        //해당 번호와 같으면, 그 해당 번호의 내용을 출력. 
+        var data = this.state.contents[i];
+        if(data.id === this.state.selected_content_id){
+          return data;
+          break;
+        }
+        i = i + 1;
+      }
+}
+getContent(){
     var _title, _desc, _article = null;
     //welcome 일 경우 아래 코드 실행. welcome 이므로 아래 코드가 실행된다. 
     if(this.state.mode === 'welcome'){
@@ -56,18 +69,8 @@ class App extends Component {
       _article = <ReadContent title={_title} desc={_desc}></ReadContent>
     } else if(this.state.mode === 'read'){
       //read 일 경우 아래 코드 실행. 
-      var i = 0;
-      while(i < this.state.contents.length){
-        //해당 번호와 같으면, 그 해당 번호의 내용을 출력. 
-        var data = this.state.contents[i];
-        if(data.id === this.state.selected_content_id){
-          _title = data.title;
-          _desc = data.desc;
-          break;
-        }
-        i = i + 1;
-      }
-      _article= <ReadContent title={_title} desc={_desc}></ReadContent>
+      var _content = this.getReadContent();
+      _article= <ReadContent title={_content.title} desc={_content.desc}></ReadContent>
     } else if(this.state.mode === 'create'){
       //title 과 desc 값을 CreateContent 에서 가져온다 .
       _article = <CreateContent onSubmit={function(_title, _desc){
@@ -78,15 +81,45 @@ class App extends Component {
         //   {id:this.max_content_id, title:_title, desc:_desc}
         // };
         //concat: 원본 데이터를 수정하지 않고, 새로운 데이터를 state에 추가. 
-        var _contents = this.state.contents.concat(
-          {id:this.max_content_id, title:_title, desc:_desc}
-        )
+        var _contents = Array.from(this.state.contents);
+        _contents.push({id:this.max_contnet_id, title:_title, desc:_desc});
         this.setState({
-          contents:this.state.contents
+          contents:_contents,
+          mode:'read',
+          selected_content_id:this.max_content_id
         });
-      
       }.bind(this)}></CreateContent>
+
+    } else if(this.state.mode === 'update'){
+      _content = this.getReadContent();
+      //title 과 desc 값을 CreateContent 에서 가져온다 .
+      _article = <UpdateContent data={_content} onSubmit={
+        function(_id, _title, _desc){
+          //복제한 새로운 배열을 만들어 준다. 
+          var _contents = Array.from(this.state.contents);
+          var i = 0;
+          while(i < _contents.length){
+            if(_contents[i].id === _id) {
+              _contents[i] = {id:_id, title:_title, desc:_desc};
+              break;
+            }
+            i = i + 1;
+          }
+          //max content 하나 더해주기
+          //새로운 컨텐츠 state 에 setState 사용해서 추가해주기 
+          // this.state.contents.push{
+          //   {id:this.max_content_id, title:_title, desc:_desc}
+          // };
+          //concat: 원본 데이터를 수정하지 않고, 새로운 데이터를 state에 추가. 
+          this.setState({
+            contents:_contents
+          });
+      }.bind(this)}></UpdateContent>
     }
+    return _article;
+}
+render() {
+  console.log('App render');
     return (
       <div className="App">
         <Subject 
@@ -133,12 +166,34 @@ class App extends Component {
           data={this.state.contents}
         ></TOC>
         <Control onChangeMode={function(_mode){
-          this.setState({
-          //fuction 에서 가져온 모드로 변경 
-            mode:_mode
-          })
+          if(_mode === 'delete'){
+            if(window.confirm('really?')){
+              var _contents = Array.from(this.state.contents);
+              var i = 0;
+              while(i < this.state.contents.length){
+                if(_contents[i].id === this.state.selected_content_id){
+                  _contents.splice(i,1);
+                  break;
+                }
+                
+                i = i + 1;
+              }
+              this.setState({
+                mode:'welcome',
+                contents:_contents
+              });
+              alert('deleted!');
+            }
+          } else {
+
+            this.setState({
+            //fuction 에서 가져온 모드로 변경 
+              mode:_mode
+            });
+          }  
+
         }.bind(this)}></Control>
-        {_article}
+        {this.getContent()}
       </div>
     );
   }
